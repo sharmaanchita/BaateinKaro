@@ -18,6 +18,8 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from ii_home.views import *
+from . import settings
+from django.conf.urls.static import static
 
 
 urlpatterns = [
@@ -25,3 +27,5 @@ urlpatterns = [
     path("", home_view, name="home"),
     path("profile/", include("ii_users.urls")),
 ]
+
+urlpatterns += static(settings.MEDIA_URL, document_root = settings.MEDIA_ROOT)

@@ -1,4 +1,8 @@
 __pycache__/
 *.pyc
-
 myvenv/
+media/
+node/
+media/
+migrations/
+db.sqlite3
