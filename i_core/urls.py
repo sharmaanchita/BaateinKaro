@@ -22,13 +22,13 @@ from ii_users.views import *
 from . import settings
 from django.conf.urls.static import static
 
-
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("", home_view, name="home"),
     path("profile/", include("ii_users.urls")),
     path("accounts/", include("allauth.urls")),
-    path("@<username>", profile_view, name="profile")
+    path("@<username>", profile_view, name="profile"),
+    path("emailchange/", profile_emailchange, name="profile_emailchange"),
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root = settings.MEDIA_ROOT)
