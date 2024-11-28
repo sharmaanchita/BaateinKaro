@@ -5,4 +5,5 @@ media/
 node/
 media/
 migrations/
+
 db.sqlite3
