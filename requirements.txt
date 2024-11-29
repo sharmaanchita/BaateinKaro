@@ -3,4 +3,5 @@ pillow
 django-htmx
 django-cleanup
 django-allauth
-whitenoise
+shortuuid
+channels
