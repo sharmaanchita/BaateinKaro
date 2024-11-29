@@ -24,11 +24,12 @@ from django.conf.urls.static import static
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-    path("", home_view, name="home"),
     path("profile/", include("ii_users.urls")),
     path("accounts/", include("allauth.urls")),
     path("@<username>", profile_view, name="profile"),
     path("emailchange/", profile_emailchange, name="profile_emailchange"),
+    
+    path("", include("iii_chat.urls")),
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root = settings.MEDIA_ROOT)
