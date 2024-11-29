@@ -3,38 +3,54 @@ from .models import *
 from django.shortcuts import get_object_or_404
 import json
 from django.template.loader import render_to_string
+from asgiref.sync import async_to_sync
 
 class ChatroomConsumer(WebsocketConsumer):
+    
     def connect(self):
         self.user = self.scope['user']
-        self.chatroom_name = self.scope['url_route']['kwargs']['chatroom_name']
-        try:
-            self.chatroom = get_object_or_404(ChatGroup, group_name=self.chatroom_name)
-            self.accept()
-            print(f"Connected to chatroom: {self.chatroom_name}")
-        except Exception as e:
-            print(f"Connection failed: {e}")
-            self.close()
+        self.chatroom_name = self.scope['url_route']['kwargs']['chatroom_name'] 
+        self.chatroom = get_object_or_404(ChatGroup, group_name=self.chatroom_name)
         
+        async_to_sync(self.channel_layer.group_add)(
+            self.chatroom_name, self.channel_name
+        )
+        
+        self.accept()
+        
+        
+    def disconnect(self, close_code):
+        async_to_sync(self.channel_layer.group_discard)(
+            self.chatroom_name, self.channel_name
+        )
         
     def receive(self, text_data):
+        text_data_json = json.loads(text_data)
+        body = text_data_json['body']
         
-        try:
-            text_data_json = json.loads(text_data)
-            body = text_data_json.get('body')
-     
-            message = ChatMessage.objects.create(
-                body=body,
-                author=self.user,
-                group=self.chatroom
-            )
-            
-            context = {'chat': message, 'user': self.user}
-            html = render_to_string('iii_chat/partials/chat_load.html', context=context)
-            
-            # Send the HTML back to the client
-            self.send(text_data=html)
-            
-        except Exception as e:
-            print(f"Error in receive: {e}")
+        message = ChatMessage.objects.create(
+            body = body,
+            author = self.user, 
+            group = self.chatroom 
+        )
+        event = {
+            'type': 'message_handler',
+            'message_id': message.id,
+        }
+        async_to_sync(self.channel_layer.group_send)(
+            self.chatroom_name, event
+        )
         
+    def message_handler(self, event):
+        message_id = event['message_id']
+        message = ChatMessage.objects.get(id=message_id)
+        context = {
+            'chat': message,
+            'user': self.user,
+            'chat_group': self.chatroom
+        }
+        html = render_to_string("iii_chat/partials/chat_load.html", context=context)
+        self.send(text_data=html)
+        
+            
+
