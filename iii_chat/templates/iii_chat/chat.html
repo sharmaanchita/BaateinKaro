@@ -9,7 +9,7 @@
         </div>
 
         <div id="chat_container" style="overflow-y: auto; max-height: 400px;" class="grow">
-            <ul id='chat_messages' class="flex flex-col justify-end gap-2 p-4">
+            <ul id='chat_messages' hx-swap="beforeend"  class="flex flex-col justify-end gap-2 p-4" >
                 {% for chat in chat_messages reversed %}
                 {% include 'iii_chat/chat_messages.html' %}
                 {% endfor %}
@@ -19,10 +19,11 @@
         <div class="sticky bottom-0 z-10 p-2 bg-gray-800">
             <div class="flex items-center rounded-xl px-2 py-2">
                 <form id="chat_message_form" class="w-full"
-                hx-post="{% url 'home' %}"
-                hx-target="#chat_messages"
-                hx-swap="beforeend"
-                _="on htmx:beforeSend reset() me">
+                hx-swap="beforeend" 
+                hx-ext="ws"
+                ws-connect="ws/chatroom/public_chat"
+                ws-send
+                _="on htmx:wsAfterSend reset() me">
 
                     {% csrf_token %}
                     {{form}}
